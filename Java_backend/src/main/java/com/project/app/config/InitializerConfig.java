@@ -34,19 +34,29 @@ public class InitializerConfig implements CommandLineRunner {
             return;
         }
 
-        if (!userRepository.existsByEmail(adminEmail)) {
-            User admin = new User();
+        User admin = userRepository.findByEmail(adminEmail).orElse(null);
+        
+        if (admin == null) {
+            admin = new User();
             admin.setUsername("Admin");
             admin.setEmail(adminEmail);
             admin.setPassword(passwordEncoder.encode(adminPassword));
             admin.setIsAdmin(true);
             admin.setIsActive(true);
             admin.setPlan("Pro");
+            admin.setFullName("Admin User");
 
             userRepository.save(admin);
             System.out.println("✅ Admin user created: " + adminEmail);
         } else {
-            System.out.println("ℹ️ Admin user already exists: " + adminEmail);
+            // Update existing admin to ensure fullName is set
+            if (admin.getFullName() == null || admin.getFullName().isEmpty()) {
+                admin.setFullName("Admin User");
+                userRepository.save(admin);
+                System.out.println("✅ Admin user updated with fullName: " + adminEmail);
+            } else {
+                System.out.println("ℹ️ Admin user already exists: " + adminEmail);
+            }
         }
     }
 }

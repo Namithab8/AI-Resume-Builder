@@ -37,7 +37,7 @@ public class User {
 
     private LocalDateTime lastLogin;
 
-    @Column
+    @Column(nullable = false)
     private String fullName = "";
 
     @Column

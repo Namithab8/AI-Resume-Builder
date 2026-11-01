@@ -43,6 +43,7 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setIsAdmin(request.getEmail().equals(adminEmail));
         user.setIsActive(true);
+        user.setFullName(request.getUsername());
 
         userRepository.save(user);
 

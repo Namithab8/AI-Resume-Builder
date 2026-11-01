@@ -27,10 +27,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        
+
+        String path = request.getRequestURI();
+
+        // Skip JWT filter for public endpoints
+        if (path.startsWith("/api/auth/") || path.startsWith("/api/ai/") ||
+            path.startsWith("/api/test/") || path.startsWith("/api/template") ||
+            path.startsWith("/api/blog") || path.startsWith("/api/plans") ||
+            path.startsWith("/uploads/") || path.startsWith("/api/downloads/") ||
+            path.startsWith("/h2-console")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         final String requestTokenHeader = request.getHeader("Authorization");
         final String cookieToken = getCookieValue(request, "token");
-        
+
         String jwtToken = null;
         Long userId = null;
 
@@ -55,14 +67,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userId.toString());
 
             if (jwtUtil.validateToken(jwtToken, userId)) {
-                UsernamePasswordAuthenticationToken authToken = 
+                UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
-        
+
         filterChain.doFilter(request, response);
     }
 

@@ -23,10 +23,11 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request, 
+    public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request,
                                                           HttpServletResponse response) {
+        System.out.println("Login attempt - Email: " + request.getEmail() + ", RememberMe: " + request.getRememberMe());
         ApiResponse<LoginResponse> authResponse = authService.login(request);
-        
+
         if (authResponse.getSuccess() && authResponse.getData() != null) {
             // Set cookie if login successful
             Cookie cookie = new Cookie("token", authResponse.getData().getToken());
@@ -36,7 +37,8 @@ public class AuthController {
             cookie.setMaxAge(request.getRememberMe() ? 30 * 24 * 60 * 60 : 2 * 60 * 60); // 30 days or 2 hours
             response.addCookie(cookie);
         }
-        
+
+        System.out.println("Login response - Success: " + authResponse.getSuccess() + ", Message: " + authResponse.getMessage());
         return ResponseEntity.status(authResponse.getSuccess() ? 200 : 401).body(authResponse);
     }
 
